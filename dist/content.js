@@ -169,14 +169,27 @@ browser.storage.onChanged.addListener((changes) => {
   }
 });
 
-document.body.addEventListener('click', () => {
-  if (autoScrolling.tid !== -1 &&
-      autoScrolling.stopScrollingByClick == true) {
-    browser.runtime.sendMessage({
-      isScrolling: false
-    }).then(() => {
-      autoScrolling.stop();
-    }).catch(__WEBPACK_IMPORTED_MODULE_0__utils__["a" /* onError */]);
+document.body.addEventListener('keydown', (e) => {
+  if (e.keyCode == 32 && e.target == document.body) {
+	e.preventDefault();	
+	
+	if (autoScrolling.tid !== -1 &&
+		autoScrolling.stopScrollingByClick == true) {
+		browser.runtime.sendMessage({
+		isScrolling: false
+		}).then(() => {
+		autoScrolling.stop();
+		}).catch(__WEBPACK_IMPORTED_MODULE_0__utils__["a" /* onError */]);
+	} else {
+		new Promise((resolve, reject) => {
+			autoScrolling.x = window.scrollX;
+			autoScrolling.y = window.scrollY;
+			autoScrolling.scrollingElement = getScrollingElement();
+			return resolve();
+		}).then(() => {
+			autoScrolling.start();
+		});
+	}
   }
 });
 
