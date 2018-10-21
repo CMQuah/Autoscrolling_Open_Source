@@ -93,7 +93,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   
   
   
-  
+  var currentspeed = 0;
   
 const autoScrolling = {
     tid: -1,
@@ -208,22 +208,32 @@ function keysPressed(e) {
 
     // Shift+ up key
     if (keys[16] && keys[38]) {
-        new Promise((resolve, reject) => {
-            autoScrolling.x = window.scrollX;
-            autoScrolling.y = window.scrollY;
-            autoScrolling.scrollingElement = getScrollingElement();
-            return resolve();
-        }).then(() => {
-            autoScrolling.start();
-        });
+  	    e.preventDefault();
+	      currentspeed = autoScrolling.scrollingSpeed;
+	      currentspeed = parseInt(currentspeed, 10);
+	      currentspeed += 1;
+	  
+	      if (currentspeed > 100)
+		        currentspeed = 99;
+	  
+        autoScrolling.scrollingSpeed = currentspeed;
     }
-	//Shift+ down key
+	  
+	  //Shift+ down key  
     if (keys[16] && keys[40]) {
-        autoScrolling.stop();
+	      e.preventDefault();
+	      currentspeed = autoScrolling.scrollingSpeed;
+	      currentspeed = parseInt(currentspeed, 10);
+	      currentspeed -= 1;
+	  
+	      if (currentspeed < 0)
+		      currentspeed = 1;
+	  
+        autoScrolling.scrollingSpeed = currentspeed;
     }
 }
-
-function keysReleased(e) {
+    
+  function keysReleased(e) {
     // mark keys that were released
     keys[e.keyCode] = false;
 }
