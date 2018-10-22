@@ -93,7 +93,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   
   
   
-  var currentspeed = 0;
+var currentspeed = 0;
+var count = 0;
   
 const autoScrolling = {
     tid: -1,
@@ -143,8 +144,10 @@ browser.storage.sync.get({
 
 
 browser.runtime.onMessage.addListener((msg) => {
-    if (!msg.isScrolling && autoScrolling.tid !== -1) {
+	console.log(count, msg.isScrolling);
+    if (count == 1 || !msg.isScrolling && autoScrolling.tid !== -1) {
         autoScrolling.stop();
+		count -= 1;
     } else if (msg.isScrolling) {
         new Promise((resolve, reject) => {
             autoScrolling.x = window.scrollX;
@@ -153,6 +156,7 @@ browser.runtime.onMessage.addListener((msg) => {
             return resolve();
         }).then(() => {
             autoScrolling.start();
+			count += 1;
         });
     }
 
@@ -183,6 +187,7 @@ document.body.addEventListener('keydown', (e) => {
                 isScrolling: false
             }).then(() => {
                 autoScrolling.stop();
+				count -= 1;
             }).catch(__WEBPACK_IMPORTED_MODULE_0__utils__["a" /* onError */ ]);
         } else {
             new Promise((resolve, reject) => {
@@ -191,7 +196,11 @@ document.body.addEventListener('keydown', (e) => {
                 autoScrolling.scrollingElement = getScrollingElement();
                 return resolve();
             }).then(() => {
+				browser.runtime.sendMessage({
+					isScrolling: true
+				})
                 autoScrolling.start();
+				count += 1;
             });
         }
     }
@@ -209,27 +218,29 @@ function keysPressed(e) {
     // Shift+ up key
     if (keys[16] && keys[38]) {
   	    e.preventDefault();
-	      currentspeed = autoScrolling.scrollingSpeed;
-	      currentspeed = parseInt(currentspeed, 10);
-	      currentspeed += 1;
+	    currentspeed = autoScrolling.scrollingStep;
+	    currentspeed = parseInt(currentspeed, 10);
+	    currentspeed += 1;
 	  
-	      if (currentspeed > 100)
-		        currentspeed = 99;
+	    if (currentspeed > 5)
+		    currentspeed = 5;
 	  
-        autoScrolling.scrollingSpeed = currentspeed;
+        autoScrolling.scrollingStep = currentspeed;
+		//console.log(autoScrolling.scrollingStep);
     }
 	  
-	  //Shift+ down key  
+	//Shift+ down key  
     if (keys[16] && keys[40]) {
-	      e.preventDefault();
-	      currentspeed = autoScrolling.scrollingSpeed;
-	      currentspeed = parseInt(currentspeed, 10);
-	      currentspeed -= 1;
+	    e.preventDefault();
+	    currentspeed = autoScrolling.scrollingStep;
+	    currentspeed = parseInt(currentspeed, 10);
+	    currentspeed -= 1;
 	  
-	      if (currentspeed < 0)
-		      currentspeed = 1;
+	    if (currentspeed < 1)
+		    currentspeed = 1;
 	  
-        autoScrolling.scrollingSpeed = currentspeed;
+        autoScrolling.scrollingStep = currentspeed;
+		//console.log(autoScrolling.scrollingStep);
     }
 }
     
