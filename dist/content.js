@@ -177,6 +177,19 @@ browser.storage.onChanged.addListener((changes) => {
     }
 });
 
+// mouse click to stop autoscrolling
+document.body.addEventListener('click', () => {
+    if (autoScrolling.tid !== -1 &&
+        autoScrolling.stopScrollingByClick == true) {
+        browser.runtime.sendMessage({
+            isScrolling: false
+        }).then(() => {
+            autoScrolling.stop();
+			count -= 1;
+        }).catch(__WEBPACK_IMPORTED_MODULE_0__utils__["a" /* onError */ ]);
+    }
+});
+
 // added spacebar to autoscroll or stop
 document.body.addEventListener('keydown', (e) => {
     if (e.keyCode == 32 && e.target == document.body) {
