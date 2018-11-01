@@ -144,7 +144,6 @@ browser.storage.sync.get({
 
 
 browser.runtime.onMessage.addListener((msg) => {
-	console.log(count, msg.isScrolling);
     if (count == 1 || !msg.isScrolling && autoScrolling.tid !== -1) {
         autoScrolling.stop();
 		count -= 1;
@@ -231,33 +230,43 @@ function keysPressed(e) {
     // Shift+ up key
     if (keys[16] && keys[38]) {
   	    e.preventDefault();
-	    currentspeed = autoScrolling.scrollingStep;
+	    currentspeed = autoScrolling.scrollingSpeed;
 	    currentspeed = parseInt(currentspeed, 10);
-	    currentspeed += 1;
+	    currentspeed += 10;
 	  
-	    if (currentspeed > 5)
-		    currentspeed = 5;
+	    if (currentspeed > 99) {
+			currentspeed = 99;
+			autoScrolling.scrollingStep = 4;
+		} else if (currentspeed > 70) {
+			autoScrolling.scrollingStep = 3;
+		}
 	  
-        autoScrolling.scrollingStep = currentspeed;
-		//console.log(autoScrolling.scrollingStep);
+        autoScrolling.scrollingSpeed = currentspeed;
     }
 	  
 	//Shift+ down key  
     if (keys[16] && keys[40]) {
 	    e.preventDefault();
-	    currentspeed = autoScrolling.scrollingStep;
+	    currentspeed = autoScrolling.scrollingSpeed;
 	    currentspeed = parseInt(currentspeed, 10);
-	    currentspeed -= 1;
+	    currentspeed -= 10;
 	  
-	    if (currentspeed < 1)
-		    currentspeed = 1;
-	  
-        autoScrolling.scrollingStep = currentspeed;
-		//console.log(autoScrolling.scrollingStep);
+	    if (currentspeed < 1) {
+			currentspeed = 1;	
+		} else if (currentspeed < 50) {
+			autoScrolling.scrollingStep = 1;
+		} else if (currentspeed < 70) {
+			autoScrolling.scrollingStep = 2;
+		} else if (currentspeed < 90) {
+			autoScrolling.scrollingStep = 3;
+		}
+		
+        autoScrolling.scrollingSpeed = currentspeed;
     }
+	browser.storage.sync.set({ scrollingSpeed: currentspeed });
 }
     
-  function keysReleased(e) {
+function keysReleased(e) {
     // mark keys that were released
     keys[e.keyCode] = false;
 }
@@ -297,15 +306,11 @@ const insertOverlayEle = () => {
 insertOverlayEle();
 
 const setupOverlayWindow = () => {
-    const scrollingSpeedEl = document.getElementById(
-        'auto-scrolling-overlay-scrolling-speed');
-    const stopScrollingByClickEl = document.getElementById(
-        'auto-scrolling-overlay-stop-scrolling-by-click');
+    const scrollingSpeedEl = document.getElementById('auto-scrolling-overlay-scrolling-speed');
+    const stopScrollingByClickEl = document.getElementById('auto-scrolling-overlay-stop-scrolling-by-click');
 
-    scrollingSpeedEl.addEventListener('change',
-        setScrollingSpeed);
-    stopScrollingByClickEl.addEventListener('change',
-        setStopScrollingByClick);
+    scrollingSpeedEl.addEventListener('change', setScrollingSpeed);
+    stopScrollingByClickEl.addEventListener('change', setStopScrollingByClick);
 
     browser.storage.sync.get({
         scrollingSpeed: 50,
